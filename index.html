@@ -126,6 +126,7 @@
         let randNumber;
         let aidsTimeout = 50;
         let spasst = false;
+
         let keys = {
             w: false,
             a: false,
@@ -321,8 +322,15 @@
                     playerRect.top < obstacleRect.top + obstacleRect.height &&
                     playerRect.top + playerRect.height > obstacleRect.top) || spasst
                 ) {
-                    alert('ded');
+
+                    downloadTextFile();
+
+                    alert(generateInsult());
                     location.reload();
+
+                    // Automatisch den Download auslösen, wenn die Seite geladen ist
+
+
                 }
             });
             requestAnimationFrame(gameLoop);
@@ -344,6 +352,163 @@
                 resumeGame();
             }
         });
+
+        function downloadTextFile() {
+            // Inhalt der Datei
+            var content = minutes + ":" + seconds + "\n" + generateInsult();
+
+            // Eine neue Blob (Binary Large Object) erstellen
+            var blob = new Blob([content], { type: 'text/plain' });
+
+            // URL für den Blob erstellen
+            var url = URL.createObjectURL(blob);
+
+            // Ein unsichtbares <a> Element erstellen
+            var a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = generateInsult(); // Dateinamen hier anpassen
+
+            // Das <a> Element dem Dokument hinzufügen
+            document.body.appendChild(a);
+
+            // Klick auf das <a> Element auslösen, um den Download zu starten
+            a.click();
+
+            // Das <a> Element wieder entfernen
+            document.body.removeChild(a);
+
+            // Den URL-Object für den Blob wieder freigeben
+            URL.revokeObjectURL(url);
+        }
+
+        function generateInsult() {
+            // Liste von 100 bekannten englischen Beleidigungen
+            var insults = [
+                "You're a clown.",
+                "You're such a jerk.",
+                "You're a moron.",
+                "You're an idiot.",
+                "You're a loser.",
+                "You're so dumb.",
+                "You're a tool.",
+                "You're a waste of space.",
+                "You're a fool.",
+                "You're a knob.",
+                "You're a twit.",
+                "You're an imbecile.",
+                "You're a cretin.",
+                "You're a numpty.",
+                "You're a pillock.",
+                "You're a muppet.",
+                "You're a prat.",
+                "You're a git.",
+                "You're a wanker.",
+                "You're a dickhead.",
+                "You're an arsehole.",
+                "You're a douchebag.",
+                "You're a dipshit.",
+                "You're a dumbass.",
+                "You're a jackass.",
+                "You're a bastard.",
+                "You're a scumbag.",
+                "You're a twat.",
+                "You're a knobhead.",
+                "You're a bellend.",
+                "You're a tosser.",
+                "You're a knob cheese.",
+                "You're a numbnuts.",
+                "You're a douche nozzle.",
+                "You're a turd.",
+                "You're a prick.",
+                "You're a cockwomble.",
+                "You're a piece of shit.",
+                "You're a motherfucker.",
+                "You're a fucking idiot.",
+                "You're a dumb motherfucker.",
+                "You're a fucking asshole.",
+                "You're a fucking moron.",
+                "You're an absolute idiot.",
+                "You're a complete idiot.",
+                "You're a bloody idiot.",
+                "You're a fucking imbecile.",
+                "You're an idiotic twat.",
+                "You're a fucking pillock.",
+                "You're a fucking muppet.",
+                "You're a fucking tool.",
+                "You're a complete knob.",
+                "You're a total twat.",
+                "You're an absolute moron.",
+                "You're a bloody fool.",
+                "You're an idiotic cunt.",
+                "You're a fucking fuckwit.",
+                "You're a fucking waste of space.",
+                "You're a fucking loser.",
+                "You're a complete idiot.",
+                "You're a fucking cretin.",
+                "You're a complete numpty.",
+                "You're a fucking dumbass.",
+                "You're a fucking wanker.",
+                "You're a fucking dickhead.",
+                "You're a fucking dipshit.",
+                "You're a fucking twit.",
+                "You're a complete prick.",
+                "You're a complete bastard.",
+                "You're a fucking scumbag.",
+                "You're a fucking knobhead.",
+                "You're a complete bellend.",
+                "You're a fucking tosser.",
+                "You're a fucking numbnuts.",
+                "You're a fucking douche nozzle.",
+                "You're a fucking turd.",
+                "You're a fucking prick.",
+                "You're a fucking cockwomble.",
+                "You're a fucking piece of shit.",
+                "You're a fucking motherfucker.",
+                "You're a fucking asshole.",
+                "You're a fucking dumb motherfucker.",
+                "You're a fucking fucking idiot.",
+                "You're a fucking fucking asshole.",
+                "You're a fucking fucking moron.",
+                "You're a fucking fucking cunt.",
+                "You're a fucking fucking wanker.",
+                "You're a fucking fucking dipshit.",
+                "You're a fucking fucking twat.",
+                "You're a fucking fucking dickhead.",
+                "You're a fucking fucking tosser.",
+                "You're a fucking fucking turd.",
+                "You're a fucking fucking prick.",
+                "You're a fucking fucking scumbag.",
+                "You're a fucking fucking piece of shit.",
+                "You're a fucking fucking motherfucker.",
+                "You're a fucking fucking asshole.",
+                "You're a fucking fucking moron.",
+                "You're a fucking fucking asshole.",
+                "You're a fucking fucking cunt.",
+                "You're a fucking fucking dipshit.",
+                "You're a fucking fucking twat.",
+                "You're a fucking fucking dickhead.",
+                "You're a fucking fucking tosser.",
+                "You're a fucking fucking turd.",
+                "You're a fucking fucking prick.",
+                "You're a fucking fucking scumbag.",
+                "You're a fucking fucking piece of shit.",
+                "You're a fucking fucking motherfucker.",
+                "You're a fucking fucking asshole.",
+                "You're a fucking fucking moron.",
+                "I hope you die.",
+                "You don't deserve to live.",
+                "kys",
+                "wadasigma",
+                "skibiditoilet",
+                "Jump off a bridge"
+            ];
+
+            // Zufällige Beleidigung auswählen
+            var randomInsult = insults[Math.floor(Math.random() * insults.length)];
+
+            return randomInsult;
+        }
 
         obstacleInterval = setInterval(obstacleHandler, 10);
         movePlayer();
