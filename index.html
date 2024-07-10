@@ -111,7 +111,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         const game = document.getElementById('game');
         const player = document.getElementById('player');
-        let previousPositionTop = 25;
+        let previousPositionTop = 50;
         let previousPositionLeft = 50;
         let moveSpeed = 0.2; // Geschwindigkeit in vw und vh
         let max = 3000;
@@ -147,6 +147,9 @@
                 if(max <= 0.2){
                     max = 0.2;
                 }
+                if(playTime >= 65){
+                    max = 0.14;
+                }
                 max *= 100;
                 min = max - 5;
                 firstTimeHandler = false;
@@ -169,8 +172,8 @@
                 }
             }
             moveSpeed = 0.2 + (playTime/120);
-            if(moveSpeed >= 1.5){
-                moveSpeed = 1.5;
+            if(moveSpeed >= 1.6){
+                moveSpeed = 1.6;
             }
             playTime = (minutes * 60) + seconds;
             seconds = addLeadingZero(seconds);
@@ -195,19 +198,19 @@
             previousPositionLeft = parseFloat(player.style.left);
 
             if (keys.w) {
-                playerTop = Math.max(0, playerTop - moveSpeed);
+                playerTop = Math.max(0, playerTop - (moveSpeed + 0.2));
             }
             if (keys.a) {
                 playerLeft = Math.max(0, playerLeft - moveSpeed);
             }
             if (keys.s) {
-                playerTop = Math.min(100 - playerHeight, playerTop + moveSpeed);
+                playerTop = Math.min(100 - (playerHeight / window.innerHeight * 100), playerTop + (moveSpeed + 0.2));
             }
             if (keys.d) {
-                playerLeft = Math.min(100 - playerWidth, playerLeft + moveSpeed);
+                playerLeft = Math.min(100 - (playerWidth / window.innerWidth * 100), playerLeft + moveSpeed);
             }
 
-            player.style.top = `${playerTop}vw`;
+            player.style.top = `${playerTop}vh`;
             player.style.left = `${playerLeft}vw`;
 
             requestAnimationFrame(movePlayer);
