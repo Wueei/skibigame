@@ -125,6 +125,7 @@
         let firstTimeHandler = true;
         let randNumber;
         let aidsTimeout = 50;
+        let spasst = false;
         let keys = {
             w: false,
             a: false,
@@ -145,7 +146,7 @@
 
         function obstacleHandler() {
             if (firstTimeHandler) {
-                max = 1.5 - (playTime / 25);
+                max = 1.5 - (playTime / 30);
                 if (max <= 0.2) {
                     max = 0.2;
                 }
@@ -173,15 +174,15 @@
                     minutes = addLeadingZero(minutes);
                 }
             }
-            moveSpeed = 0.3 + (playTime / 100);
-            if (moveSpeed >= 1.6) {
-                moveSpeed = 1.6;
+            moveSpeed = 0.2 + (playTime / 90);
+            if (moveSpeed >= 1) {
+                moveSpeed = 1;
             }
             playTime = (minutes * 60) + seconds;
             seconds = addLeadingZero(seconds);
             document.getElementById('timer').textContent = '';
             document.getElementById('timer').append(minutes + ":" + seconds);
-            if (playTime === 40) {
+            if (playTime === 200) {
                 setInterval(aids, 10);
             }
         }
@@ -200,13 +201,13 @@
             previousPositionLeft = parseFloat(player.style.left);
 
             if (keys.w) {
-                playerTop = Math.max(0, playerTop - (moveSpeed + 0.2));
+                playerTop = Math.max(0, playerTop - (moveSpeed * 1.3));
             }
             if (keys.a) {
                 playerLeft = Math.max(0, playerLeft - moveSpeed);
             }
             if (keys.s) {
-                playerTop = Math.min(100 - (playerHeight / window.innerHeight * 100), playerTop + (moveSpeed + 0.2));
+                playerTop = Math.min(100 - (playerHeight / window.innerHeight * 100), playerTop + (moveSpeed * 1.3));
             }
             if (keys.d) {
                 playerLeft = Math.min(100 - (playerWidth / window.innerWidth * 100), playerLeft + moveSpeed);
@@ -315,10 +316,10 @@
             document.querySelectorAll('.obstacle').forEach(obstacle => {
                 const obstacleRect = obstacle.getBoundingClientRect();
                 if (
-                    playerRect.left < obstacleRect.left + obstacleRect.width &&
+                    (playerRect.left < obstacleRect.left + obstacleRect.width &&
                     playerRect.left + playerRect.width > obstacleRect.left &&
                     playerRect.top < obstacleRect.top + obstacleRect.height &&
-                    playerRect.top + playerRect.height > obstacleRect.top
+                    playerRect.top + playerRect.height > obstacleRect.top) || spasst
                 ) {
                     alert('ded');
                     location.reload();
@@ -338,6 +339,7 @@
         document.addEventListener('visibilitychange', function () {
             if (document.hidden) {
                 pauseGame();
+                spasst = true;
             } else {
                 resumeGame();
             }
