@@ -207,17 +207,20 @@
             return num < 10 ? '0' + num : num;
         }
 
-        timerInterval = setInterval(updateTimer, 1000);
-        updateTimer();
+        function startTimer(){
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+
 
         function obstacleHandler() {
             if (firstTimeHandler) {
                 max = 1.5 - (playTime / 30);
-                if (max <= 0.4) {
-                    max = 0.4;
+                if (max <= 0.32) {
+                    max = 0.32;
                 }
                 if (playTime >= 90) {
-                    max = 0.28;
+                    max = 0.23;
                 }
                 max *= 100;
                 min = max - 5;
@@ -351,6 +354,10 @@
         }
 
         document.addEventListener('keydown', event => {
+            if(firstMove){
+                startTimer();
+                firstMove = false;
+            }
             if (event.code === 'KeyW') {
                 keys.w = true;
             }
@@ -446,17 +453,10 @@
 
         }
 
-        function pauseGame() {
-            clearInterval(timerInterval);
-        }
 
-        function resumeGame() {
-            timerInterval = setInterval(updateTimer, 1000);
-        }
 
         document.addEventListener('visibilitychange', function () {
             if (document.hidden) {
-                pauseGame();
                 spasst = true;
             } else {
                 resumeGame();
