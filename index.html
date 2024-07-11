@@ -23,8 +23,7 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            background-color: #8B4513; /* Bodenfarbe */
-            background-image: url("flor.jpg");
+            background-color: #250d2c; /* Bodenfarbe */
             background-size: cover;
         }
 
@@ -35,9 +34,24 @@
             background-color: red;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-25%, -25%);
             background-image: url('schoel.jfif'); /* Hintergrundbild hinzufügen */
             background-size: cover; /* Bild auf die gesamte Größe des Elements skalieren */
+            z-index: 821;
+            box-shadow: 0 0 1vw 0.3vw rgba(52, 255, 247, 0.7); /* Glowing effect */
+
+        }
+
+        #player::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #2ca3a6; /* Farbe der Maske */
+            opacity: 0.5; /* Deckkraft der Maske */
+            z-index: 822; /* Über dem Spieler-Element */
         }
 
         #timer {
@@ -65,6 +79,18 @@
             animation-timing-function: linear;
             background-image: url('polis.png'); /* Hintergrundbild hinzufügen */
             background-size: cover; /* Bild auf die gesamte Größe des Elements skalieren */
+        }
+
+        .trail {
+            position: absolute;
+            width: calc(1vw + 1vh);
+            height: calc(1vw + 1vh);
+            background-color: rgb(0, 224, 197);
+            border-radius: 50%;
+            box-shadow: 0 0 0.5vw rgba(87, 255, 239, 0.54), 0 0 1vw rgba(87, 255, 239, 0.35), 0 0 2vw rgba(87, 255, 239, 0.2);
+            z-index: 820; /* Ensure trails are behind player */
+            pointer-events: none; /* Ignore pointer events */
+            filter: alpha(var(10));
         }
 
         @keyframes moveHorizontalFromRight {
@@ -103,19 +129,31 @@
             }
         }
     </style>
+    <!--
+    The MIT License
+
+    Copyright (c) 2023 Julian Garnier
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    -->
 </head>
 <body>
 <div id="game">
     <div id="player"></div>
     <div id="timer"></div>
 </div>
+<script src="anime-master/lib/anime.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const game = document.getElementById('game');
         const player = document.getElementById('player');
         let previousPositionTop = 50;
         let previousPositionLeft = 50;
-        let moveSpeed = 0.2; // Geschwindigkeit in vw und vh
+        let moveSpeed = 0.4; // Geschwindigkeit in vw und vh
         let max = 3000;
         let min = max - 500;
         let firstMove = true;
@@ -125,7 +163,33 @@
         let firstTimeHandler = true;
         let randNumber;
         let aidsTimeout = 50;
+
+        let onlyOnce = true;
+
+
+
+
+        const numTrails = 40;
+        const trails = [];
+
+        // Mittelpunkt des Bildschirms berechnen
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        const centerX = screenWidth / 2;
+        const centerY = screenHeight / 2;
+
         let spasst = false;
+
+        // Create trail elements
+        for (let i = 0; i < numTrails; i++) {
+            const trail = document.createElement('div');
+            trail.classList.add('trail');
+            // Positioniere die trail Elemente in der Mitte des Bildschirms
+            trail.style.top = `${centerY}px`;
+            trail.style.left = `${centerX}px`;
+            game.appendChild(trail);
+            trails.push(trail);
+        }
 
         let keys = {
             w: false,
@@ -141,18 +205,17 @@
             return num < 10 ? '0' + num : num;
         }
 
-        function startTimer() {
-            timerInterval = setInterval(updateTimer, 1000);
-        }
+        timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
 
         function obstacleHandler() {
             if (firstTimeHandler) {
                 max = 1.5 - (playTime / 30);
-                if (max <= 0.2) {
-                    max = 0.2;
+                if (max <= 0.4) {
+                    max = 0.4;
                 }
-                if(playTime >= 90){
-                    max = 0.14;
+                if (playTime >= 90) {
+                    max = 0.28;
                 }
                 max *= 100;
                 min = max - 5;
@@ -163,6 +226,16 @@
             if (randNumber === 0) {
                 firstTimeHandler = true;
                 createObstacle();
+            }
+            if (playTime >= 90) {
+                var obstacles = document.getElementsByClassName("obstacle");
+
+                // Da getElementsByClassName eine NodeList zurückgibt, müssen wir durch die Liste iterieren
+                // und für jedes Element die gewünschte Aktion ausführen.
+                for (var i = 0; i < obstacles.length; i++) {
+                    var obstacle = obstacles[i];
+                    obstacle.style.backgroundImage = 'url(sigma5000.jfif)';
+                }
             }
         }
 
@@ -175,24 +248,21 @@
                     minutes = addLeadingZero(minutes);
                 }
             }
-            moveSpeed = 0.2 + (playTime / 90);
-            if (moveSpeed >= 1) {
-                moveSpeed = 1;
+            moveSpeed = 0.4 + (playTime / 90);
+            if (moveSpeed >= 0.84) {
+                moveSpeed = 0.84;
             }
             playTime = (minutes * 60) + seconds;
             seconds = addLeadingZero(seconds);
             document.getElementById('timer').textContent = '';
             document.getElementById('timer').append(minutes + ":" + seconds);
-            if (playTime === 200) {
-                setInterval(aids, 10);
+            if (playTime === 90) {
+                setInterval(aids, 700);
             }
+
         }
 
         function movePlayer() {
-            if (firstMove) {
-                startTimer();
-                firstMove = false;
-            }
             let playerTop = parseFloat(player.style.top) || previousPositionTop;
             let playerLeft = parseFloat(player.style.left) || previousPositionLeft;
             let playerHeight = parseFloat(player.style.height) || 0;
@@ -202,13 +272,13 @@
             previousPositionLeft = parseFloat(player.style.left);
 
             if (keys.w) {
-                playerTop = Math.max(0, playerTop - (moveSpeed * 1.3));
+                playerTop = Math.max(0, playerTop - (moveSpeed * 1.5));
             }
             if (keys.a) {
                 playerLeft = Math.max(0, playerLeft - moveSpeed);
             }
             if (keys.s) {
-                playerTop = Math.min(100 - (playerHeight / window.innerHeight * 100), playerTop + (moveSpeed * 1.3));
+                playerTop = Math.min(100 - (playerHeight / window.innerHeight * 100), playerTop + (moveSpeed * 1.5));
             }
             if (keys.d) {
                 playerLeft = Math.min(100 - (playerWidth / window.innerWidth * 100), playerLeft + moveSpeed);
@@ -217,50 +287,65 @@
             player.style.top = `${playerTop}vh`;
             player.style.left = `${playerLeft}vw`;
 
+
+            // Update trail positions
+            trails.forEach((trail, index) => {
+                setTimeout(() => {
+                    anime({
+                        targets: trail,
+                        top: `${playerTop}vh`,
+                        left: `${playerLeft}vw`,
+                        duration: 10,
+                        opacity: 1 - (index / trails.length) // Reduce opacity for trails further back
+                    });
+                }, index * (2 / moveSpeed)); // delay each trail element by 50ms
+            });
+
             requestAnimationFrame(movePlayer);
         }
 
         function createObstacle() {
             const obstacle = document.createElement('div');
             obstacle.classList.add('obstacle');
-            // Zufällige Auswahl einer Bewegungsrichtung für das Hindernis
-            const direction = Math.floor(Math.random() * 4); // 0 bis 3
-            switch (direction) {
-                case 0: // Von oben
-                    obstacle.style.top = 'calc(-4vw + -3vh)';
-                    obstacle.style.left = `${Math.random() * 100}vw`;
-                    obstacle.style.animationName = 'moveVerticalFromTop';
-                    break;
-                case 1: // Von rechts
-                    obstacle.style.top = `${Math.random() * 100}vh`;
-                    obstacle.style.left = '100vw';
-                    obstacle.style.animationName = 'moveHorizontalFromRight';
-                    break;
-                case 2: // Von unten
-                    obstacle.style.top = '100vh';
-                    obstacle.style.left = `${Math.random() * 100}vw`;
-                    obstacle.style.animationName = 'moveVerticalFromBottom';
-                    break;
-                case 3: // Von links
-                    obstacle.style.top = `${Math.random() * 100}vh`;
-                    obstacle.style.left = 'calc(-4vw + -3vh)';
-                    obstacle.style.animationName = 'moveHorizontalFromLeft';
-                    break;
-            }
-            let duration = (2.5 - (playTime / 60));
-            duration = duration + 1.2;
-            if (duration <= 1.2) {
-                duration = 1.2;
-            }
-            if ((direction === 1) || (direction === 3)) {
-                duration += 0.2;
-            }
-            obstacle.style.animationDuration = duration + 's';
-
             game.appendChild(obstacle);
-            setTimeout(() => {
-                obstacle.remove();
-            }, duration * 1000);
+
+            const direction = Math.floor(Math.random() * 4); // 0 to 3
+            let startPosition = {};
+            let endPosition = {};
+
+            switch (direction) {
+                case 0: // From top
+                    startPosition = {top: '-10%', left: `${Math.random() * 100}%`};
+                    endPosition = {top: '110%', left: `${Math.random() * 100}%`};
+                    break;
+                case 1: // From right
+                    startPosition = {top: `${Math.random() * 100}%`, left: '110%'};
+                    endPosition = {top: `${Math.random() * 100}%`, left: '-10%'};
+                    break;
+                case 2: // From bottom
+                    startPosition = {top: '110%', left: `${Math.random() * 100}%`};
+                    endPosition = {top: '-10%', left: `${Math.random() * 100}%`};
+                    break;
+                case 3: // From left
+                    startPosition = {top: `${Math.random() * 100}%`, left: '-10%'};
+                    endPosition = {top: `${Math.random() * 100}%`, left: '110%'};
+                    break;
+            }
+
+            let duration = 4500 - (playTime / 150);
+
+            if (duration <= 1900) {
+                duration = 1900;
+            }
+
+            anime({
+                targets: obstacle,
+                top: [startPosition.top, endPosition.top],
+                left: [startPosition.left, endPosition.left],
+                easing: 'linear',
+                duration: (Math.random() * 1000) + duration, // Random duration between 3s to 5s
+                complete: () => obstacle.remove()
+            });
         }
 
         document.addEventListener('keydown', event => {
@@ -294,22 +379,36 @@
         });
 
         function aids() {
-            document.getElementById("game").style.filter = 'invert(1)';
-            setTimeout(function () {
-                document.getElementById("game").style.filter = 'invert(0)';
-            }, aidsTimeout);
-            setTimeout(function () {
-                document.getElementById("game").style.filter = 'invert(1)';
-            }, 2 * aidsTimeout);
-            setTimeout(function () {
-                document.getElementById("game").style.filter = 'invert(0)';
-            }, 3 * aidsTimeout);
-            setTimeout(function () {
-                document.getElementById("game").style.filter = 'invert(1)';
-            }, 4 * aidsTimeout);
-            setTimeout(function () {
-                document.getElementById("game").style.filter = 'invert(0)';
-            }, 5 * aidsTimeout);
+            var elements = document.getElementsByClassName("trail");
+
+            for (var i = 0; i < elements.length; i++) {
+                var element = elements[i];
+
+                // Starte den Effekt für jedes Element
+                element.style.filter = 'invert(1)';
+
+                // Setze Timeout für die Wiederherstellung des ursprünglichen Filters
+                setTimeout(function(el) {
+                    el.style.filter = 'invert(0)';
+                }, aidsTimeout, element);
+
+                // Setze zusätzliche Timeouts für das Ein- und Ausschalten des Filters
+                setTimeout(function(el) {
+                    el.style.filter = 'invert(1)';
+                }, 2 * aidsTimeout, element);
+
+                setTimeout(function(el) {
+                    el.style.filter = 'invert(0)';
+                }, 3 * aidsTimeout, element);
+
+                setTimeout(function(el) {
+                    el.style.filter = 'invert(1)';
+                }, 4 * aidsTimeout, element);
+
+                setTimeout(function(el) {
+                    el.style.filter = 'invert(0)';
+                }, 5 * aidsTimeout, element);
+            }
         }
 
         function gameLoop() {
@@ -318,22 +417,31 @@
                 const obstacleRect = obstacle.getBoundingClientRect();
                 if (
                     (playerRect.left < obstacleRect.left + obstacleRect.width &&
-                    playerRect.left + playerRect.width > obstacleRect.left &&
-                    playerRect.top < obstacleRect.top + obstacleRect.height &&
-                    playerRect.top + playerRect.height > obstacleRect.top) || spasst
+                        playerRect.left + playerRect.width > obstacleRect.left &&
+                        playerRect.top < obstacleRect.top + obstacleRect.height &&
+                        playerRect.top + playerRect.height > obstacleRect.top) || spasst
                 ) {
+                    clearInterval(timerInterval);
+                    clearInterval(obstacleInterval);
 
-                    downloadTextFile();
+                    if (onlyOnce) {
+                        onlyOnce = false;
+                        location.reload();
+                        alert(generateInsult());
+                    }
 
-                    alert(generateInsult());
-                    location.reload();
 
                     // Automatisch den Download auslösen, wenn die Seite geladen ist
 
 
                 }
+
+
             });
+
             requestAnimationFrame(gameLoop);
+
+
         }
 
         function pauseGame() {
@@ -358,7 +466,7 @@
             var content = minutes + ":" + seconds + "\n" + generateInsult();
 
             // Eine neue Blob (Binary Large Object) erstellen
-            var blob = new Blob([content], { type: 'text/plain' });
+            var blob = new Blob([content], {type: 'text/plain'});
 
             // URL für den Blob erstellen
             var url = URL.createObjectURL(blob);
@@ -385,123 +493,119 @@
         function generateInsult() {
             // Liste von 100 bekannten englischen Beleidigungen
             var insults = [
-                "You're a clown.",
-                "You're such a jerk.",
-                "You're a moron.",
-                "You're an idiot.",
-                "You're a loser.",
-                "You're so dumb.",
-                "You're a tool.",
-                "You're a waste of space.",
-                "You're a fool.",
-                "You're a knob.",
-                "You're a twit.",
-                "You're an imbecile.",
-                "You're a cretin.",
-                "You're a numpty.",
-                "You're a pillock.",
-                "You're a muppet.",
-                "You're a prat.",
-                "You're a git.",
-                "You're a wanker.",
-                "You're a dickhead.",
-                "You're an arsehole.",
-                "You're a douchebag.",
-                "You're a dipshit.",
-                "You're a dumbass.",
-                "You're a jackass.",
-                "You're a bastard.",
-                "You're a scumbag.",
-                "You're a twat.",
-                "You're a knobhead.",
-                "You're a bellend.",
-                "You're a tosser.",
-                "You're a knob cheese.",
-                "You're a numbnuts.",
-                "You're a douche nozzle.",
-                "You're a turd.",
-                "You're a prick.",
-                "You're a cockwomble.",
-                "You're a piece of shit.",
-                "You're a motherfucker.",
-                "You're a fucking idiot.",
-                "You're a dumb motherfucker.",
-                "You're a fucking asshole.",
-                "You're a fucking moron.",
-                "You're an absolute idiot.",
-                "You're a complete idiot.",
-                "You're a bloody idiot.",
-                "You're a fucking imbecile.",
-                "You're an idiotic twat.",
-                "You're a fucking pillock.",
-                "You're a fucking muppet.",
-                "You're a fucking tool.",
-                "You're a complete knob.",
-                "You're a total twat.",
-                "You're an absolute moron.",
-                "You're a bloody fool.",
-                "You're an idiotic cunt.",
-                "You're a fucking fuckwit.",
-                "You're a fucking waste of space.",
-                "You're a fucking loser.",
-                "You're a complete idiot.",
-                "You're a fucking cretin.",
-                "You're a complete numpty.",
-                "You're a fucking dumbass.",
-                "You're a fucking wanker.",
-                "You're a fucking dickhead.",
-                "You're a fucking dipshit.",
-                "You're a fucking twit.",
-                "You're a complete prick.",
-                "You're a complete bastard.",
-                "You're a fucking scumbag.",
-                "You're a fucking knobhead.",
-                "You're a complete bellend.",
-                "You're a fucking tosser.",
-                "You're a fucking numbnuts.",
-                "You're a fucking douche nozzle.",
-                "You're a fucking turd.",
-                "You're a fucking prick.",
-                "You're a fucking cockwomble.",
-                "You're a fucking piece of shit.",
-                "You're a fucking motherfucker.",
-                "You're a fucking asshole.",
-                "You're a fucking dumb motherfucker.",
-                "You're a fucking fucking idiot.",
-                "You're a fucking fucking asshole.",
-                "You're a fucking fucking moron.",
-                "You're a fucking fucking cunt.",
-                "You're a fucking fucking wanker.",
-                "You're a fucking fucking dipshit.",
-                "You're a fucking fucking twat.",
-                "You're a fucking fucking dickhead.",
-                "You're a fucking fucking tosser.",
-                "You're a fucking fucking turd.",
-                "You're a fucking fucking prick.",
-                "You're a fucking fucking scumbag.",
-                "You're a fucking fucking piece of shit.",
-                "You're a fucking fucking motherfucker.",
-                "You're a fucking fucking asshole.",
-                "You're a fucking fucking moron.",
-                "You're a fucking fucking asshole.",
-                "You're a fucking fucking cunt.",
-                "You're a fucking fucking dipshit.",
-                "You're a fucking fucking twat.",
-                "You're a fucking fucking dickhead.",
-                "You're a fucking fucking tosser.",
-                "You're a fucking fucking turd.",
-                "You're a fucking fucking prick.",
-                "You're a fucking fucking scumbag.",
-                "You're a fucking fucking piece of shit.",
-                "You're a fucking fucking motherfucker.",
-                "You're a fucking fucking asshole.",
-                "You're a fucking fucking moron.",
+                "You're a worthless piece of garbage",
+                "Nobody likes you",
+                "I wish you were never born",
+                "You're a waste of space",
+                "Go crawl back into the hole you came from",
+                "You're a disgrace to humanity",
+                "I hope bad things happen to you",
+                "You're lower than dirt",
+                "You're a pathetic excuse for a human being",
+                "You're so dumb, it's embarrassing",
+                "You're a stain on society",
+                "You're an idiotic moron",
+                "You're a sad excuse for a person",
+                "You're a joke, plain and simple",
+                "I've seen smarter rocks",
+                "You're a walking disaster",
+                "You're a failure in every sense",
+                "I can't believe someone like you exists",
+                "You bring misery wherever you go",
+                "You're a burden to everyone around you",
+                "I wouldn't trust you to tie your own shoes",
+                "You're as useful as a screen door on a submarine",
+                "You're a total waste of oxygen",
+                "You're a regrettable mistake",
+                "You're a colossal disappointment",
+                "You're the reason people have middle fingers",
+                "You're a living nightmare",
+                "You're a walking catastrophe",
+                "You're a stain on the gene pool",
+                "You're a walking advertisement for birth control",
+                "You're proof that evolution can go in reverse",
+                "You're an absolute embarrassment",
+                "You're a tragedy waiting to happen",
+                "You're a disaster in motion",
+                "You're the reason why aliens won't talk to us",
+                "You're a complete and utter failure",
+                "You're a disappointment to your parents",
+                "You're a mistake that should've been corrected",
+                "You're the punchline to a really bad joke",
+                "You're a walking cautionary tale",
+                "You're a sorry excuse for a human",
+                "You're a dumpster fire personified",
+                "You're a failure wrapped in skin",
+                "You're a walking argument against natural selection",
+                "You're the epitome of incompetence",
+                "You're a walking punchline",
+                "You're a train wreck waiting to happen",
+                "You're a disaster of cosmic proportions",
+                "You're a cautionary example of what not to be",
+                "You're a failure at life",
+                "You're a stain on the fabric of society",
+                "You're a regrettable accident",
+                "You're a disgrace to the human race",
+                "You're a walking joke",
+                "You're a joke no one laughs at",
+                "You're a miserable failure",
+                "You're a tragic mess",
+                "You're a catastrophe incarnate",
+                "You're an insult to intelligence",
+                "You're a disaster waiting to unfold",
+                "You're a complete and utter disaster",
+                "You're a failure by every measure",
+                "You're a miserable excuse for a person",
+                "You're a pathetic shell of a human",
+                "You're a walking disaster area",
+                "You're a disappointment to humanity",
+                "You're an embarrassment to yourself",
+                "You're a complete and total letdown",
+                "You're a catastrophe in progress",
+                "You're a cautionary tale of failure",
+                "You're a walking mistake",
+                "You're a mockery of competence",
+                "You're a tragedy in motion",
+                "You're an affront to decency",
+                "You're a walking disgrace",
+                "You're a failure in every possible way",
+                "You're a living disaster",
+                "You're a complete and utter disgrace",
+                "You're a train wreck of a person",
+                "You're a walking embarrassment",
+                "You're a disaster of epic proportions",
+                "You're a complete failure",
+                "You're a pathetic excuse for a human",
+                "You're a failure wrapped in disappointment",
+                "You're a walking mockery",
+                "You're a mistake that should've been corrected at birth",
+                "You're a joke that isn't funny",
+                "You're a disgrace to your ancestors",
+                "You're a tragedy waiting to happen",
+                "You're a cautionary example of what not to be",
+                "You're a disappointment to everyone who knows you",
+                "You're an embarrassment to the concept of dignity",
+                "You're a failure in progress",
+                "You're a disaster unfolding",
+                "You're a complete waste of space",
+                "You're an embarrassment to yourself and others",
+                "You're a walking failure",
+                "You're a disgrace to the name human",
+                "You're a tragic mess of a person",
+                "You're a regrettable mistake of nature",
                 "I hope you die.",
                 "You don't deserve to live.",
                 "kys",
                 "wadasigma",
                 "skibiditoilet",
-                "Jump off a bridge"
+                "Jump off a bridge",
+                "Go Fuck yourself.",
+                "Dini meer isch e fetti fotze.",
+                "Figg dini meer wie Jäggi.",
+                "Du Beta.",
+                "Bring di um.",
+                "Du bisch ke Sigma",
+                "FOTZE"
             ];
 
             // Zufällige Beleidigung auswählen
